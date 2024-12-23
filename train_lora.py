@@ -17,7 +17,7 @@ from peft import (
 
 def main():
     # 初始化模型和分词器
-    model_name = "glm-edge-1.5b-chat"
+    model_name = "../glm_4_91"
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     
     # 加载基础模型
@@ -36,7 +36,9 @@ def main():
         lora_dropout=0.1,       # Dropout概率
         bias="none",
         # target_modules=['q_proj', 'v_proj', 'k_proj'],  # 需要根据模型结构调整
-        target_modules=['gate_up_proj','down_proj']
+        # target_modules=['gate_up_proj','down_proj'],
+        # target_modules=['dense_h_to_4h','dense_4h_to_h']
+        target_modules=['query_key_value']
     )
 
     # 准备模型进行LoRA训练
@@ -68,8 +70,8 @@ def main():
     training_args = TrainingArguments(
         output_dir="./glm_lora_finetuned",
         num_train_epochs=300,          # 减少训练轮数
-        per_device_train_batch_size=2,
-        gradient_accumulation_steps=8,
+        per_device_train_batch_size=1,
+        gradient_accumulation_steps=1,
         learning_rate=2e-4,          # LoRA通常使用更大的学习率
         weight_decay=0.01,           # 添加权重衰减
         lr_scheduler_type="cosine",  # 使用cosine学习率调度
@@ -78,7 +80,8 @@ def main():
         deepspeed="ds_config_lora.json",
         fp16=True,
         local_rank=int(os.getenv("LOCAL_RANK", -1)),
-        ddp_backend="nccl"
+        ddp_backend="nccl",
+        gradient_checkpointing=True
     )
 
     # 初始化Trainer

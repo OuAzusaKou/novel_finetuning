@@ -15,11 +15,12 @@ def load_model(checkpoint_path, device="cuda:3", use_lora=False):
         use_lora: 是否使用LoRA模型
     """
     # 加载分词器
-    tokenizer = AutoTokenizer.from_pretrained("glm-edge-1.5b-chat", trust_remote_code=True)
+    model_name = "../ChatGLM3/THUDM/chatglm3-6b"
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     
     # 加载基础模型
     model = AutoModelForCausalLM.from_pretrained(
-        "glm-edge-1.5b-chat",
+        model_name,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
     )
@@ -78,7 +79,7 @@ def main():
     # 根据模型类型选择检查点路径和加载方式
     use_lora = True  # 设置是否使用LoRA模型
     if use_lora:
-        checkpoint_path = "./glm_lora_finetuned/checkpoint-200"  # LoRA权重路径
+        checkpoint_path = "./glm_lora_finetuned/checkpoint-1700"  # LoRA权重路径
     else:
         checkpoint_path = "./glm_finetuned/checkpoint-300"  # 完整模型检查点路径
     
